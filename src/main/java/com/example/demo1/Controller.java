@@ -5,7 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import java.sql.*;
 
-public class StudentController {
+public class Controller {
 
     @FXML private TextField txtName;
     @FXML private TextField txtCourse;
@@ -25,8 +25,10 @@ public class StudentController {
     public void initialize() {
         conn = DBConnection.connect();
 
+        // Load Enum to ChoiceBox
         cbYear.getItems().setAll(YearLevel.values());
 
+        // Table Columns Binding
         colId.setCellValueFactory(data -> data.getValue().idProperty().asObject());
         colName.setCellValueFactory(data -> data.getValue().nameProperty());
         colCourse.setCellValueFactory(data -> data.getValue().courseProperty());
@@ -34,6 +36,7 @@ public class StudentController {
 
         loadData();
 
+        // Row click event
         table.setOnMouseClicked(e -> {
             Student s = table.getSelectionModel().getSelectedItem();
             if (s != null) {
@@ -41,6 +44,7 @@ public class StudentController {
                 txtName.setText(s.getName());
                 txtCourse.setText(s.getCourse());
 
+                // Convert String back to Enum
                 for (YearLevel y : YearLevel.values()) {
                     if (y.toString().equals(s.getYearLevel())) {
                         cbYear.setValue(y);
@@ -73,9 +77,6 @@ public class StudentController {
 
     @FXML
     private void addStudent() {
-        if (txtName.getText().isEmpty() || txtCourse.getText().isEmpty() || cbYear.getValue() == null) {
-            return;
-        }
         try {
             String query = "INSERT INTO students(name, course, year_level) VALUES (?, ?, ?)";
             PreparedStatement pst = conn.prepareStatement(query);
@@ -95,10 +96,6 @@ public class StudentController {
 
     @FXML
     private void updateStudent() {
-        if (selectedId == -1) return;
-        if (txtName.getText().isEmpty() || txtCourse.getText().isEmpty() || cbYear.getValue() == null) {
-            return;
-        }
         try {
             String query = "UPDATE students SET name=?, course=?, year_level=? WHERE id=?";
             PreparedStatement pst = conn.prepareStatement(query);
@@ -119,7 +116,6 @@ public class StudentController {
 
     @FXML
     private void deleteStudent() {
-        if (selectedId == -1) return;
         try {
             String query = "DELETE FROM students WHERE id=?";
             PreparedStatement pst = conn.prepareStatement(query);
@@ -141,6 +137,5 @@ public class StudentController {
         txtCourse.clear();
         cbYear.setValue(null);
         selectedId = -1;
-        table.getSelectionModel().clearSelection();
     }
 }
